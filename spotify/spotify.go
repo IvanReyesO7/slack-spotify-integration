@@ -20,7 +20,7 @@ type Song struct {
 	Duration int
 }
 
-func GetSongs(hint string) {
+func GetSongs(hint string) ([]Song, error) {
 	ctx := context.Background()
 	config := &clientcredentials.Config{
 		ClientID:     os.Getenv("SPOTIFY_ID"),
@@ -30,6 +30,7 @@ func GetSongs(hint string) {
 	token, err := config.Token(ctx)
 	if err != nil {
 		log.Fatalf("couldn't get token: %v", err)
+		return nil, err
 	}
 
 	httpClient := spotifyauth.New().Client(ctx, token)
@@ -38,15 +39,15 @@ func GetSongs(hint string) {
 	results, err := client.Search(ctx, hint, spotify.SearchTypeTrack, spotify.Limit(5))
 	if err != nil {
 		log.Fatal(err)
+		return nil, err
 	}
 
+	tracks := []Song{}
 	if results.Tracks != nil {
 		fmt.Println("Tracks:")
 		for _, item := range results.Tracks.Tracks {
-			fmt.Println("   ", item.Name)
-			fmt.Println("   ", item.Album.Name)
-			fmt.Println("   ", item.Artists[0].Name)
-			fmt.Println("   ", item.Duration)
+			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: item.Duration})
 		}
 	}
+	return tracks, nil
 }

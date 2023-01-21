@@ -36,7 +36,11 @@ func main() {
 		}
 
 		if jsonRequest.Event.Text != "list" {
-			Spotify.GetSongs(jsonRequest.Event.Text)
+			tracks, err := Spotify.GetSongs(jsonRequest.Event.Text)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(tracks)
 		}
 
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
