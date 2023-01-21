@@ -11,8 +11,9 @@ import (
 )
 
 type Event struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type    string `json:"type"`
+	Text    string `json:"text"`
+	Channel string `json:"channel"`
 }
 
 type JsonRequest struct {
@@ -38,9 +39,15 @@ func main() {
 		if jsonRequest.Event.Text != "list" {
 			tracks, err := Spotify.GetSongs(jsonRequest.Event.Text)
 			if err != nil {
-				fmt.Println(err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			if len(tracks) < 1 {
+				c.JSON(http.StatusNotFound, gin.H{"error": "No track matched keywork passed"})
+				return
 			}
 			fmt.Println(tracks)
+			// slack.SendTracks(channel, tracks)
 		}
 
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})

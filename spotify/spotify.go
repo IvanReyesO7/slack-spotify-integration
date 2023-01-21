@@ -20,7 +20,7 @@ type Song struct {
 	Duration int
 }
 
-func GetSongs(hint string) ([]Song, error) {
+func GetSongs(keyword string) ([]Song, error) {
 	ctx := context.Background()
 	config := &clientcredentials.Config{
 		ClientID:     os.Getenv("SPOTIFY_ID"),
@@ -36,7 +36,7 @@ func GetSongs(hint string) ([]Song, error) {
 	httpClient := spotifyauth.New().Client(ctx, token)
 	client := spotify.New(httpClient)
 
-	results, err := client.Search(ctx, hint, spotify.SearchTypeTrack, spotify.Limit(5))
+	results, err := client.Search(ctx, keyword, spotify.SearchTypeTrack, spotify.Limit(5))
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
