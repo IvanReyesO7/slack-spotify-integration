@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
-	Spotify "spotify-in-the-office/spotify"
+	Spotify "slack-spotify-integration/spotify"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +21,14 @@ type JsonRequest struct {
 
 func main() {
 	r := gin.Default()
-	r.POST("/test", func(c *gin.Context) {
+	r.POST("/", func(c *gin.Context) {
+		challenge, _ := ioutil.ReadAll(c.Request.Body)
+		fmt.Printf("%s", string(challenge))
+		c.JSON(http.StatusOK, gin.H{
+			"challenge": string(challenge),
+		})
+	})
+	r.POST("/endpoint", func(c *gin.Context) {
 		var jsonRequest JsonRequest
 		if err := c.ShouldBindJSON(&jsonRequest); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
