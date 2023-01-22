@@ -53,7 +53,7 @@ func main() {
 				return
 			}
 
-			Slack.Ping(event.Channel, event.Ts)
+			Slack.SendTracks(event.Channel, event.Ts, tracks)
 			return
 		}
 
