@@ -13,10 +13,9 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
 
 	for _, track := range tracks {
-		sectionBlock := buildSection(track)
-		actionBlock := buildAction(track)
+		attachments := buildAttachment(track)
 
-		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionBlocks(slack.SectionBlock(sectionBlock), slack.ActionBlock(actionBlock)))
+		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
@@ -24,15 +23,9 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song) {
 	}
 }
 
-func buildSection(track Spotify.Song) slack.SectionBlock {
-	var textBlockObject slack.TextBlockObject = slack.TextBlockObject{Type: "mrkdwn", Text: fmt.Sprintf("&gt;*Track Name*\n&gt;%s\n&gt;*Album Name*\n&gt;%s\n&gt;*Artist*\n&gt;%s\n", track.Title, track.Album, track.Artist)}
-	var messageBlockType slack.MessageBlockType = "section"
-	return slack.SectionBlock{Type: messageBlockType, Text: &textBlockObject}
-}
-
-func buildAction(track Spotify.Song) slack.ActionBlock {
-	var messageBlockType slack.MessageBlockType = "actions"
-	var TextBlockObject slack.TextBlockObject = slack.TextBlockObject{Type: "plain_text", Text: "Add to Playlist"}
-	var blockElements slack.BlockElements = slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &TextBlockObject, Value: track.Id}}}
-	return slack.ActionBlock{Type: messageBlockType, Elements: &blockElements}
+func buildAttachment(track Spotify.Song) slack.Attachment {
+	var text string = fmt.Sprintf("*Track Name*\n%s\n*Album Name*\n%s\n*Artist*\n%s\n", track.Title, track.Album, track.Artist)
+	actions := []slack.AttachmentAction{slack.AttachmentAction{Name: "Add", Text: "Add to Playlist", Type: "button", Value: track.Id, Style: "primary"}}
+	attachment := slack.Attachment{Color: "#1CDF63", Text: text, Actions: actions, CallbackID: fmt.Sprint("track_id_%s", track.Id), Fallback: "Done!"}
+	return attachment
 }
