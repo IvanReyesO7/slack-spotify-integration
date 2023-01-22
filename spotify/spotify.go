@@ -14,7 +14,7 @@ import (
 )
 
 type Song struct {
-	Id       int
+	Id       string
 	Title    string
 	Album    string
 	Artist   string
