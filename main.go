@@ -33,8 +33,6 @@ func main() {
 		})
 	})
 	r.POST("/endpoint", func(c *gin.Context) {
-		// challenge, _ := ioutil.ReadAll(c.Request.Body)
-		// fmt.Printf("%s", string(challenge))
 		var jsonRequest JsonRequest
 		if err := c.ShouldBindJSON(&jsonRequest); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -56,7 +54,6 @@ func main() {
 			Slack.SendTracks(event.Channel, event.Ts, tracks)
 			return
 		}
-
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
