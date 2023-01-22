@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	Slack "slack-spotify-integration/slack"
 	Spotify "slack-spotify-integration/spotify"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ type Event struct {
 	Type    string `json:"type"`
 	Text    string `json:"text"`
 	Channel string `json:"channel"`
+	Ts      string `json:"ts"`
+	BotId   string `json:"bot_id"`
 }
 
 type JsonRequest struct {
@@ -30,14 +33,17 @@ func main() {
 		})
 	})
 	r.POST("/endpoint", func(c *gin.Context) {
+		// challenge, _ := ioutil.ReadAll(c.Request.Body)
+		// fmt.Printf("%s", string(challenge))
 		var jsonRequest JsonRequest
 		if err := c.ShouldBindJSON(&jsonRequest); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		var event Event = jsonRequest.Event
 
-		if jsonRequest.Event.Text != "list" {
-			tracks, err := Spotify.GetSongs(jsonRequest.Event.Text)
+		if (event.Text != "list") && (event.BotId == "") && (event.Text != "") {
+			tracks, err := Spotify.GetSongs(event.Text)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
@@ -46,8 +52,9 @@ func main() {
 				c.JSON(http.StatusNotFound, gin.H{"error": "No track matched keywork passed"})
 				return
 			}
-			fmt.Println(tracks)
-			// slack.SendTracks(channel, tracks)
+
+			Slack.Ping(event.Channel, event.Ts)
+			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
