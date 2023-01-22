@@ -56,5 +56,13 @@ func main() {
 		}
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
 	})
+	r.POST("/add-to-playlist", func(c *gin.Context) {
+
+		c.JSON(http.StatusOK, gin.H{
+			"replace_original": "true",
+			"text":             "✅ Added to the playlist",
+		})
+	})
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
