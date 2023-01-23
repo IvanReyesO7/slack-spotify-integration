@@ -3,9 +3,14 @@ package spotify
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
+	"github.com/tidwall/gjson"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
 	"golang.org/x/oauth2/clientcredentials"
@@ -54,26 +59,40 @@ func GetSongs(keyword string) ([]Song, error) {
 }
 
 func AddTrackToPlaylist(track_id string) {
-	ctx := context.Background()
-	config := &clientcredentials.Config{
-		ClientID:     os.Getenv("SPOTIFY_ID"),
-		ClientSecret: os.Getenv("SPOTIFY_SECRET"),
-		TokenURL:     spotifyauth.TokenURL,
-	}
-	token, err := config.Token(ctx)
+	token := getSpotifyToken()
+	println(token)
+	// playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
+	// track := spotify.ID(track_id)
+
+	// // id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(id)
+}
+
+func getSpotifyToken() string {
+	requestUrl := "https://accounts.spotify.com/api/token"
+	buffer := fmt.Sprintf("Basic %s", os.Getenv("SPOTIFY_BUFFER"))
+
+	data := url.Values{}
+	data.Set("grant_type", "client_credentials")
+
+	req, err := http.NewRequest(http.MethodPost, requestUrl, strings.NewReader(data.Encode()))
+	req.Header.Set("Authorization", buffer)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := http.Client{}
+
+	res, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("couldn't get token: %v", err)
+		fmt.Printf("client: error making http request: %s\n", err)
+		os.Exit(1)
 	}
-
-	httpClient := spotifyauth.New().Client(ctx, token)
-	client := spotify.New(httpClient)
-
-	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
-	track := spotify.ID(track_id)
-
-	id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
+	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-	fmt.Println(id)
+	bodyString := string(bodyBytes)
+	return gjson.Get(bodyString, "access_token").String()
 }
