@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/tidwall/gjson"
+
 	Slack "slack-spotify-integration/slack"
 	Spotify "slack-spotify-integration/spotify"
 
@@ -67,7 +69,11 @@ func main() {
 			log.Fatal(err)
 			return
 		}
-		fmt.Println(decodedValue)
+
+		json := decodedValue[8:]
+		trackId := (gjson.Get(json, "callback_id")).String()
+
+		fmt.Println(trackId)
 
 		c.JSON(http.StatusOK, gin.H{
 			"replace_original": "true",
