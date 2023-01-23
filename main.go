@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
 
 	Slack "slack-spotify-integration/slack"
 	Spotify "slack-spotify-integration/spotify"
@@ -57,6 +59,15 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
 	})
 	r.POST("/add-to-playlist", func(c *gin.Context) {
+		request, _ := ioutil.ReadAll(c.Request.Body)
+		encodedValue := string(request)
+		decodedValue, err := url.QueryUnescape(encodedValue)
+
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		fmt.Println(decodedValue)
 
 		c.JSON(http.StatusOK, gin.H{
 			"replace_original": "true",

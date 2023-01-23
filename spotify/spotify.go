@@ -47,7 +47,7 @@ func GetSongs(keyword string) ([]Song, error) {
 	if results.Tracks != nil {
 		fmt.Println("Tracks:")
 		for _, item := range results.Tracks.Tracks {
-			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: item.Duration})
+			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: item.Duration, Id: string(item.ID)})
 		}
 	}
 	return tracks, nil
