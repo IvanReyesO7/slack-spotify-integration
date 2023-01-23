@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -66,14 +65,13 @@ func main() {
 		decodedValue, err := url.QueryUnescape(encodedValue)
 
 		if err != nil {
-			log.Fatal(err)
 			return
 		}
 
 		json := decodedValue[8:]
 		trackId := (gjson.Get(json, "callback_id")).String()
 
-		fmt.Println(trackId)
+		Spotify.AddTrackToPlaylist(trackId)
 
 		c.JSON(http.StatusOK, gin.H{
 			"replace_original": "true",

@@ -52,3 +52,28 @@ func GetSongs(keyword string) ([]Song, error) {
 	}
 	return tracks, nil
 }
+
+func AddTrackToPlaylist(track_id string) {
+	ctx := context.Background()
+	config := &clientcredentials.Config{
+		ClientID:     os.Getenv("SPOTIFY_ID"),
+		ClientSecret: os.Getenv("SPOTIFY_SECRET"),
+		TokenURL:     spotifyauth.TokenURL,
+	}
+	token, err := config.Token(ctx)
+	if err != nil {
+		fmt.Printf("couldn't get token: %v", err)
+	}
+
+	httpClient := spotifyauth.New().Client(ctx, token)
+	client := spotify.New(httpClient)
+
+	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
+	track := spotify.ID(track_id)
+
+	id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(id)
+}
