@@ -28,7 +28,7 @@ type JsonRequest struct {
 
 func main() {
 	r := gin.Default()
-	r.POST("/", func(c *gin.Context) {
+	r.POST("/callback", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
 		fmt.Printf("%s", string(challenge))
 		c.JSON(http.StatusOK, gin.H{
@@ -76,6 +76,13 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"replace_original": "true",
 			"text":             "✅ Added to the playlist",
+		})
+	})
+	r.GET("/callback", func(c *gin.Context) {
+		code := c.Request.URL.Query().Get("code")
+		fmt.Printf("%s", string(code))
+		c.JSON(http.StatusOK, gin.H{
+			"challenge": string(code),
 		})
 	})
 

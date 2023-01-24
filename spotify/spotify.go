@@ -13,6 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/zmb3/spotify/v2"
@@ -59,16 +60,19 @@ func GetSongs(keyword string) ([]Song, error) {
 }
 
 func AddTrackToPlaylist(track_id string) {
-	token := getSpotifyToken()
-	println(token)
-	// playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
-	// track := spotify.ID(track_id)
+	ctx := context.Background()
+	token := oauth2.Token{AccessToken: getSpotifyToken()}
 
-	// // id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(id)
+	httpClient := spotifyauth.New().Client(ctx, &token)
+	client := spotify.New(httpClient)
+	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
+	track := spotify.ID(track_id)
+
+	id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(id)
 }
 
 func getSpotifyToken() string {
@@ -76,7 +80,9 @@ func getSpotifyToken() string {
 	buffer := fmt.Sprintf("Basic %s", os.Getenv("SPOTIFY_BUFFER"))
 
 	data := url.Values{}
-	data.Set("grant_type", "client_credentials")
+	data.Set("grant_type", "authorization_code")
+	data.Set("redirect_uri", "https://e8cf-210-172-128-230.jp.ngrok.io/callback")
+	data.Set("code", os.Getenv("SPOTIFY_IVAN_TOKEN"))
 
 	req, err := http.NewRequest(http.MethodPost, requestUrl, strings.NewReader(data.Encode()))
 	req.Header.Set("Authorization", buffer)
