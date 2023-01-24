@@ -59,7 +59,7 @@ func GetSongs(keyword string) ([]Song, error) {
 	return tracks, nil
 }
 
-func AddTrackToPlaylist(track_id string) {
+func AddTrackToPlaylist(track_id string) (*string, error) {
 	ctx := context.Background()
 	token := oauth2.Token{AccessToken: getSpotifyToken()}
 
@@ -68,11 +68,11 @@ func AddTrackToPlaylist(track_id string) {
 	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
 	track := spotify.ID(track_id)
 
-	id, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
+	snapshot, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	fmt.Println(id)
+	return &snapshot, nil
 }
 
 func getSpotifyToken() string {
