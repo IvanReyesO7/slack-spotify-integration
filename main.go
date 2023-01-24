@@ -71,18 +71,26 @@ func main() {
 		json := decodedValue[8:]
 		trackId := (gjson.Get(json, "callback_id")).String()
 
-		Spotify.AddTrackToPlaylist(trackId)
+		snapshot, err := Spotify.AddTrackToPlaylist(trackId)
 
-		c.JSON(http.StatusOK, gin.H{
-			"replace_original": "true",
-			"text":             "✅ Added to the playlist",
-		})
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"replace_original": "true",
+				"text":             "Something went wrong",
+			})
+		} else if snapshot != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"replace_original": "true",
+				"text":             "✅ Added to the playlist",
+			})
+		}
+
 	})
 	r.GET("/callback", func(c *gin.Context) {
 		code := c.Request.URL.Query().Get("code")
 		fmt.Printf("%s", string(code))
 		c.JSON(http.StatusOK, gin.H{
-			"challenge": string(code),
+			"code": string(code),
 		})
 	})
 
