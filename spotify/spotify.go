@@ -61,7 +61,7 @@ func GetSongs(keyword string) ([]Song, error) {
 
 func AddTrackToPlaylist(track_id string) (*string, error) {
 	ctx := context.Background()
-	token := oauth2.Token{AccessToken: getSpotifyAccessToken()}
+	token := oauth2.Token{AccessToken: RefreshSpotifyAccessToken()}
 
 	httpClient := spotifyauth.New().Client(ctx, &token)
 	client := spotify.New(httpClient)
@@ -76,43 +76,13 @@ func AddTrackToPlaylist(track_id string) (*string, error) {
 	return &snapshot, nil
 }
 
-func getSpotifyAccessToken() string {
-	requestUrl := "https://accounts.spotify.com/api/token"
-	buffer := fmt.Sprintf("Basic %s", os.Getenv("SPOTIFY_BUFFER"))
-
-	data := url.Values{}
-	data.Set("grant_type", "authorization_code")
-	data.Set("redirect_uri", "https://e8cf-210-172-128-230.jp.ngrok.io/callback")
-	data.Set("code", os.Getenv("SPOTIFY_IVAN_TOKEN"))
-
-	req, err := http.NewRequest(http.MethodPost, requestUrl, strings.NewReader(data.Encode()))
-	req.Header.Set("Authorization", buffer)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	client := http.Client{}
-
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Printf("client: error making http request: %s\n", err)
-		os.Exit(1)
-	}
-	bodyBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bodyString := string(bodyBytes)
-	println("ACCESS TOKEN\n")
-	println(bodyString)
-	return gjson.Get(bodyString, "access_token").String()
-}
-
-func RefreshSpotifyAccessToken(refresh_token string) string {
+func RefreshSpotifyAccessToken() string {
 	requestUrl := "https://accounts.spotify.com/api/token"
 	buffer := fmt.Sprintf("Basic %s", os.Getenv("SPOTIFY_BUFFER"))
 
 	data := url.Values{}
 	data.Set("grant_type", "refresh_token")
-	data.Set("refresh_token", refresh_token)
+	data.Set("refresh_token", os.Getenv("SPOTIFY_REFRESH_TOKEN"))
 
 	req, err := http.NewRequest(http.MethodPost, requestUrl, strings.NewReader(data.Encode()))
 	req.Header.Set("Authorization", buffer)
