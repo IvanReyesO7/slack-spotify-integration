@@ -24,7 +24,7 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song) {
 }
 
 func buildAttachment(track Spotify.Song) slack.Attachment {
-	var text string = fmt.Sprintf("*Track Name*\n%s\n*Album Name*\n%s\n*Artist*\n%s\n", track.Title, track.Album, track.Artist)
+	var text string = fmt.Sprintf("*Track Name*\n%s\n*Artist*\n%s\n*Album Name*\n%s\n", track.Title, track.Artist, track.Album)
 	actions := []slack.AttachmentAction{slack.AttachmentAction{Name: "Add", Text: "Add to Playlist", Type: "button", Value: track.Id, Style: "primary"}}
 	attachment := slack.Attachment{Color: "#1CDF63", Text: text, Actions: actions, CallbackID: track.Id, Fallback: "Done!"}
 	return attachment
