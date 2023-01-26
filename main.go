@@ -8,6 +8,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
+	Infrastructure "slack-spotify-integration/infrastructure"
 	Slack "slack-spotify-integration/slack"
 	Spotify "slack-spotify-integration/spotify"
 
@@ -27,6 +28,7 @@ type JsonRequest struct {
 }
 
 func main() {
+	Infrastructure.NewConfig()
 	r := gin.Default()
 	r.POST("/", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
@@ -69,6 +71,7 @@ func main() {
 		}
 
 		json := decodedValue[8:]
+		fmt.Printf(json)
 		trackId := (gjson.Get(json, "callback_id")).String()
 
 		snapshot, err := Spotify.AddTrackToPlaylist(trackId)
