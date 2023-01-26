@@ -50,8 +50,10 @@ func buildFooter(track Spotify.Song) slack.SectionBlock {
 	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}}
 }
 
-func UpdateOriginalMessage(action_id string) {
+func UpdateOriginalMessage(channelId string, messageTs string, responseUrl string) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
-	attachment := slack.Attachment{Color: "#1CDF63"}
-	_, _, _, err := api.UpdateMessage()
+	_, _, _, err := api.UpdateMessage(channelId, messageTs, slack.MsgOptionReplaceOriginal(responseUrl), slack.MsgOptionText("Track added to the Playlist", false))
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
 }
