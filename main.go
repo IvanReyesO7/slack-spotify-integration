@@ -72,10 +72,9 @@ func main() {
 
 		json := decodedValue[8:]
 
-		trackId := (gjson.Get(json, "callback_id")).String()
-		responseUrl := (gjson.Get(json, "response_url")).String()
-		channel_id := (gjson.Get(json, "channel.id")).String()
-		text := (gjson.Get(json, "original_message.attachments.0.text")).String()
+		trackId := (gjson.Get(json, "actions.0.value")).String()
+		actionId := (gjson.Get(json, "actions.0.block_id")).String()
+		fmt.Println(trackId)
 
 		snapshot, err := Spotify.AddTrackToPlaylist(trackId)
 
@@ -85,7 +84,7 @@ func main() {
 				"text":             "Something went wrong",
 			})
 		} else if snapshot != nil {
-			Slack.UpdateOriginalMessage(channel_id, responseUrl, text)
+			Spotify.UpdateOriginalMessage(actionId)
 		}
 
 	})

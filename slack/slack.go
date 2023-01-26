@@ -13,7 +13,7 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
 
 	for _, track := range tracks {
-		attachments := buildAttachment(track)
+		attachments := buildAttachmentTwo(track)
 
 		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
 		if err != nil {
@@ -30,11 +30,28 @@ func buildAttachment(track Spotify.Song) slack.Attachment {
 	return attachment
 }
 
-func UpdateOriginalMessage(channel_id string, responseUrl string, text string) {
+func buildAttachmentTwo(track Spotify.Song) slack.Attachment {
+	header := buildHeader(track)
+	footer := buildFooter(track)
+	action := slack.ActionBlock{Type: "actions", Elements: &slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &slack.TextBlockObject{Type: "plain_text", Text: "Add To Playlist"}, Value: track.Id, Style: "primary"}}}}
+	blocks := []slack.Block{header, footer, action}
+	attachment := slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: blocks}}
+	return attachment
+}
+
+func buildHeader(track Spotify.Song) slack.SectionBlock {
+	text := fmt.Sprintf("*Track Name*\n%s\n*Album Name*\n%s", track.Title, track.Album)
+	accessory := slack.Accessory{ImageElement: &slack.ImageBlockElement{Type: "image", ImageURL: track.UrlImage}}
+	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}, Accessory: &accessory}
+}
+
+func buildFooter(track Spotify.Song) slack.SectionBlock {
+	text := fmt.Sprintf("*Artist*\n%s\n*ID*\n`%s`", track.Artist, track.Id)
+	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}}
+}
+
+func UpdateOriginalMessage(action_id string) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
-	attachment := slack.Attachment{Color: "#1CDF63", Text: text}
-	_, _, _, err := api.UpdateMessage(channel_id, "1405894322.002768", slack.MsgOptionResponseURL(responseUrl, "in_channel"), slack.MsgOptionReplaceOriginal(responseUrl), slack.MsgOptionAttachments(attachment))
-	if err != nil {
-		fmt.Printf("%s\n", err)
-	}
+	attachment := slack.Attachment{Color: "#1CDF63"}
+	_, _, _, err := api.UpdateMessage()
 }
