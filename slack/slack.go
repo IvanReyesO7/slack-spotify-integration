@@ -29,3 +29,12 @@ func buildAttachment(track Spotify.Song) slack.Attachment {
 	attachment := slack.Attachment{Color: "#1CDF63", Text: text, Actions: actions, CallbackID: track.Id, Fallback: "Done!"}
 	return attachment
 }
+
+func UpdateOriginalMessage(channel_id string, responseUrl string, text string) {
+	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
+	attachment := slack.Attachment{Color: "#1CDF63", Text: text}
+	_, _, _, err := api.UpdateMessage(channel_id, "1405894322.002768", slack.MsgOptionResponseURL(responseUrl, "in_channel"), slack.MsgOptionReplaceOriginal(responseUrl), slack.MsgOptionAttachments(attachment))
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+}
