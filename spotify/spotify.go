@@ -24,7 +24,8 @@ type Song struct {
 	Title    string
 	Album    string
 	Artist   string
-	Duration int
+	Duration string
+	UrlImage string
 }
 
 func GetSongs(keyword string) ([]Song, error) {
@@ -51,9 +52,8 @@ func GetSongs(keyword string) ([]Song, error) {
 
 	tracks := []Song{}
 	if results.Tracks != nil {
-		fmt.Println("Tracks:")
 		for _, item := range results.Tracks.Tracks {
-			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: item.Duration, Id: string(item.ID)})
+			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: convertDuration(item.Duration), Id: string(item.ID), UrlImage: item.Album.Images[0].URL})
 		}
 	}
 	return tracks, nil
@@ -101,4 +101,11 @@ func RefreshSpotifyAccessToken() string {
 	}
 	bodyString := string(bodyBytes)
 	return gjson.Get(bodyString, "access_token").String()
+}
+
+func convertDuration(duration int) string {
+	secs := duration / 1000
+	mins := secs / 60
+	sec := secs - (mins * 60)
+	return fmt.Sprintf("%d:%d", mins, sec)
 }
