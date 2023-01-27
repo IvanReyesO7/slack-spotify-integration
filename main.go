@@ -59,6 +59,10 @@ func main() {
 			Slack.SendTracks(event.Channel, event.Ts, tracks)
 			return
 		}
+		if (event.Text == "list") && (event.BotId == "") && (event.Text != "") {
+			tracks, _ := Spotify.GetPlaylistQueue()
+			fmt.Println(tracks)
+		}
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
 	})
 	r.POST("/add-to-playlist", func(c *gin.Context) {

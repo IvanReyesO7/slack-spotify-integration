@@ -59,6 +59,29 @@ func GetSongs(keyword string) ([]Song, error) {
 	return tracks, nil
 }
 
+func GetPlaylistQueue() ([]Song, error) {
+	ctx := context.Background()
+	token := oauth2.Token{AccessToken: RefreshSpotifyAccessToken()}
+
+	httpClient := spotifyauth.New().Client(ctx, &token)
+	client := spotify.New(httpClient)
+	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
+	results, err := client.GetPlaylistItems(ctx, playlist_id)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	tracks := []Song{}
+	if results.Items != nil {
+		for _, item := range results.Items {
+			tracks = append(tracks, Song{Title: item.Track.Track.Name, Album: item.Track.Track.Album.Name, Artist: item.Track.Track.Artists[0].Name, Duration: convertDuration(item.Track.Track.Duration), Id: string(item.Track.Track.ID), UrlImage: item.Track.Track.Album.Images[0].URL})
+		}
+
+	}
+	return tracks, nil
+}
+
 func AddTrackToPlaylist(track_id string) (*string, error) {
 	ctx := context.Background()
 	token := oauth2.Token{AccessToken: RefreshSpotifyAccessToken()}
