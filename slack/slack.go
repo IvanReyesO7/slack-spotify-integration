@@ -20,12 +20,13 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action 
 			attachments = buildAttachmentNoAction(track)
 		}
 
-		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
+		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
 
 	}
+	return
 }
 
 func buildAttachment(track Spotify.Song) slack.Attachment {

@@ -45,31 +45,39 @@ func main() {
 			return
 		}
 		var event Event = jsonRequest.Event
+		fmt.Println(event)
 
-		if (strings.ToLower(event.Text) != "list") && (event.BotId == "") && (event.Text != "") {
-			tracks, err := Spotify.GetSongs(event.Text)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if event.BotId == "" && event.Text != "" {
+			fmt.Println("====OH SHIT=====")
+			if strings.ToLower(event.Text) != "list" {
+				tracks, err := Spotify.GetSongs(event.Text)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
+				if len(tracks) < 1 {
+					c.JSON(http.StatusNotFound, gin.H{"error": "No track matched keywork passed"})
+					return
+				}
+
+				Slack.SendTracks(event.Channel, event.Ts, tracks, true)
 				return
 			}
-			if len(tracks) < 1 {
-				c.JSON(http.StatusNotFound, gin.H{"error": "No track matched keywork passed"})
+			if strings.ToLower(event.Text) == "list" {
+				fmt.Println("===SENDING TRACKS====")
+				tracks, _ := Spotify.GetPlaylistQueue()
+				fmt.Println(tracks)
+				if tracks == nil {
+					c.JSON(418, gin.H{"error": "No tracks in the playlist"})
+					return
+				}
+
+				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
 				return
 			}
-
-			Slack.SendTracks(event.Channel, event.Ts, tracks, true)
-			return
 		}
-		if (strings.ToLower(event.Text) == "list") && (event.BotId == "") && (event.Text != "") {
-			tracks, _ := Spotify.GetPlaylistQueue()
-			if tracks == nil {
-				c.JSON(418, gin.H{"error": "No tracks in the playlist"})
-				return
-			}
-
-			Slack.SendTracks(event.Channel, event.Ts, tracks, false)
-		}
-		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
+		c.JSON(http.StatusOK, nil)
+		return
 	})
 	r.POST("/add-to-playlist", func(c *gin.Context) {
 		request, _ := ioutil.ReadAll(c.Request.Body)
