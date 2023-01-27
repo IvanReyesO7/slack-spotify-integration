@@ -56,12 +56,17 @@ func main() {
 				return
 			}
 
-			Slack.SendTracks(event.Channel, event.Ts, tracks)
+			Slack.SendTracks(event.Channel, event.Ts, tracks, true)
 			return
 		}
 		if (event.Text == "list") && (event.BotId == "") && (event.Text != "") {
 			tracks, _ := Spotify.GetPlaylistQueue()
-			fmt.Println(tracks)
+			if tracks == nil {
+				c.JSON(418, gin.H{"error": "No tracks in the playlist"})
+				return
+			}
+
+			Slack.SendTracks(event.Channel, event.Ts, tracks, false)
 		}
 		c.JSON(http.StatusOK, gin.H{"response": jsonRequest})
 	})

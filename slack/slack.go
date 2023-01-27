@@ -9,11 +9,16 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func SendTracks(channel string, thread_ts string, tracks []Spotify.Song) {
+func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action bool) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
 
 	for _, track := range tracks {
-		attachments := buildAttachment(track)
+		var attachments slack.Attachment
+		if action == true {
+			attachments = buildAttachment(track)
+		} else {
+			attachments = buildAttachmentNoAction(track)
+		}
 
 		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
 		if err != nil {
@@ -32,14 +37,19 @@ func buildAttachment(track Spotify.Song) slack.Attachment {
 	return attachment
 }
 
+func buildAttachmentNoAction(track Spotify.Song) slack.Attachment {
+	header := buildHeader(track)
+	return slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: []slack.Block{header}}}
+}
+
 func buildHeader(track Spotify.Song) slack.SectionBlock {
-	text := fmt.Sprintf("*Track Name*\n%s\n*Album Name*\n%s", track.Title, track.Album)
+	text := fmt.Sprintf("*Track Name*\n%s\n*Artist*\n%s", track.Title, track.Artist)
 	accessory := slack.Accessory{ImageElement: &slack.ImageBlockElement{Type: "image", ImageURL: track.UrlImage}}
 	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}, Accessory: &accessory}
 }
 
 func buildFooter(track Spotify.Song) slack.SectionBlock {
-	text := fmt.Sprintf("*Artist*\n%s\n*ID*\n`%s`", track.Artist, track.Id)
+	text := fmt.Sprintf("*Album Name*\n%s\n*ID*\n`%s`", track.Album, track.Id)
 	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}}
 }
 
