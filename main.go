@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/tidwall/gjson"
 
@@ -45,7 +46,7 @@ func main() {
 		}
 		var event Event = jsonRequest.Event
 
-		if (event.Text != "list") && (event.BotId == "") && (event.Text != "") {
+		if (strings.ToLower(event.Text) != "list") && (event.BotId == "") && (event.Text != "") {
 			tracks, err := Spotify.GetSongs(event.Text)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -59,7 +60,7 @@ func main() {
 			Slack.SendTracks(event.Channel, event.Ts, tracks, true)
 			return
 		}
-		if (event.Text == "list") && (event.BotId == "") && (event.Text != "") {
+		if (strings.ToLower(event.Text) == "list") && (event.BotId == "") && (event.Text != "") {
 			tracks, _ := Spotify.GetPlaylistQueue()
 			if tracks == nil {
 				c.JSON(418, gin.H{"error": "No tracks in the playlist"})
