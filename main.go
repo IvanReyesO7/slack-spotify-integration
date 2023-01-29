@@ -48,7 +48,6 @@ func main() {
 		fmt.Println(event)
 
 		if event.BotId == "" && event.Text != "" {
-			fmt.Println("====OH SHIT=====")
 			if strings.ToLower(event.Text) != "list" {
 				tracks, err := Spotify.GetSongs(event.Text)
 				if err != nil {
@@ -64,7 +63,6 @@ func main() {
 				return
 			}
 			if strings.ToLower(event.Text) == "list" {
-				fmt.Println("===SENDING TRACKS====")
 				tracks, _ := Spotify.GetPlaylistQueue()
 				fmt.Println(tracks)
 				if tracks == nil {

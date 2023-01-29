@@ -24,7 +24,6 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action 
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
-
 	}
 	return
 }
