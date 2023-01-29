@@ -31,6 +31,9 @@ type JsonRequest struct {
 func main() {
 	Infrastructure.NewConfig()
 	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"response": "Server up"})
+	})
 	r.POST("/", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
 		fmt.Printf("%s", string(challenge))
