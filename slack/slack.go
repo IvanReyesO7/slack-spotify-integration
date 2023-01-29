@@ -67,7 +67,7 @@ func UpdateOriginalMessage(trackValue string, channelId string, messageTs string
 		ImageURL: track.UrlImage,
 	}
 
-	text := slack.TextBlockObject{Type: "mrkdwn", Text: "Track added to the Playlist!"}
+	text := slack.TextBlockObject{Type: "mrkdwn", Text: fmt.Sprintf("_*%s*_ by _*%s*_ added to the Playlist!", track.Title, track.Artist)}
 	context := slack.NewContextBlock("", image, text)
 
 	blocks := []slack.Block{header, footer, context}
