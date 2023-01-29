@@ -82,14 +82,14 @@ func GetPlaylistQueue() ([]Song, error) {
 	return tracks, nil
 }
 
-func AddTrackToPlaylist(track_id string) (*string, error) {
+func AddTrackToPlaylist(trackId string) (*string, error) {
 	ctx := context.Background()
 	token := oauth2.Token{AccessToken: RefreshSpotifyAccessToken()}
 
 	httpClient := spotifyauth.New().Client(ctx, &token)
 	client := spotify.New(httpClient)
 	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
-	track := spotify.ID(track_id)
+	track := spotify.ID(trackId)
 
 	snapshot, err := client.AddTracksToPlaylist(ctx, playlist_id, track)
 	if err != nil {
