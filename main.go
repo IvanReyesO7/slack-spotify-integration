@@ -29,6 +29,7 @@ type JsonRequest struct {
 }
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	Infrastructure.NewConfig()
 	r := gin.Default()
 	r.POST("/", func(c *gin.Context) {
