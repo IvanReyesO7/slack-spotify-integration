@@ -78,3 +78,15 @@ func UpdateOriginalMessage(trackValue string, channelId string, messageTs string
 		fmt.Printf("%s\n", err)
 	}
 }
+
+func SendCommands(channel string, thread_ts string) error {
+	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
+
+	attachments := slack.Attachment{Color: "#1CDF63", Text: "These are the current commands you can use to interact with Spotify:\n`Commands||Help` Lists all the available commands.\n`List` Lists all the current tracks in the playlist.\n`{Song name}` Searchs for a song that matches the keyword typed."}
+	_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	return nil
+}

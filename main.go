@@ -48,7 +48,26 @@ func main() {
 		var event Event = jsonRequest.Event
 
 		if event.BotId == "" && event.Text != "" {
-			if strings.ToLower(event.Text) != "list" {
+			switch strings.ToLower(event.Text) {
+			case "list":
+				tracks, _ := Spotify.GetPlaylistQueue()
+				if tracks == nil {
+					c.JSON(418, gin.H{"error": "No tracks in the playlist"})
+					return
+				}
+
+				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
+				return
+			case "commands", "help":
+				err := Slack.SendCommands(event.Channel, event.Ts)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				} else {
+					c.JSON(http.StatusOK, nil)
+					return
+				}
+			default:
 				tracks, err := Spotify.GetSongs(event.Text)
 				if err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,16 +79,6 @@ func main() {
 				}
 
 				Slack.SendTracks(event.Channel, event.Ts, tracks, true)
-				return
-			}
-			if strings.ToLower(event.Text) == "list" {
-				tracks, _ := Spotify.GetPlaylistQueue()
-				if tracks == nil {
-					c.JSON(418, gin.H{"error": "No tracks in the playlist"})
-					return
-				}
-
-				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
 				return
 			}
 		}
