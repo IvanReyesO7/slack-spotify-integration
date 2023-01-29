@@ -32,14 +32,14 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	Infrastructure.NewConfig()
 	r := gin.Default()
-	r.POST("/endpoint", func(c *gin.Context) {
+	r.POST("/", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
 		fmt.Printf("%s", string(challenge))
 		c.JSON(http.StatusOK, gin.H{
 			"challenge": string(challenge),
 		})
 	})
-	r.POST("/", func(c *gin.Context) {
+	r.POST("/endpoint", func(c *gin.Context) {
 		var jsonRequest JsonRequest
 		if err := c.ShouldBindJSON(&jsonRequest); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
