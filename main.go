@@ -88,7 +88,8 @@ func main() {
 
 		json := decodedValue[8:]
 
-		trackId := (gjson.Get(json, "actions.0.value")).String()
+		trackValue := (gjson.Get(json, "actions.0.value")).String()
+		trackId := (gjson.Get(trackValue, "id")).String()
 		responseUrl := (gjson.Get(json, "response_url")).String()
 		channelId := (gjson.Get(json, "channel.id")).String()
 		messageTs := (gjson.Get(json, "container.message_ts")).String()
@@ -100,7 +101,7 @@ func main() {
 				"text":             "⛔️ Sorry, Something went wrong",
 			})
 		} else if snapshot != nil {
-			Slack.UpdateOriginalMessage(channelId, messageTs, responseUrl)
+			Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl)
 
 		}
 
