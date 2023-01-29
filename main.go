@@ -45,7 +45,6 @@ func main() {
 			return
 		}
 		var event Event = jsonRequest.Event
-		fmt.Println(event)
 
 		if event.BotId == "" && event.Text != "" {
 			if strings.ToLower(event.Text) != "list" {
@@ -64,7 +63,6 @@ func main() {
 			}
 			if strings.ToLower(event.Text) == "list" {
 				tracks, _ := Spotify.GetPlaylistQueue()
-				fmt.Println(tracks)
 				if tracks == nil {
 					c.JSON(418, gin.H{"error": "No tracks in the playlist"})
 					return
