@@ -32,7 +32,7 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action 
 func buildAttachment(track Spotify.Song) slack.Attachment {
 	header := buildHeader(track)
 	footer := buildFooter(track)
-	action := slack.ActionBlock{Type: "actions", Elements: &slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &slack.TextBlockObject{Type: "plain_text", Text: "Add To Playlist"}, Value: fmt.Sprintf(`{"id": "%s", "trackName": "%s", "trackArtist": "%s", "trasckAlbum": "%s", "imageUrl": "%s"}`, track.Id, track.Title, track.Artist, track.Album, track.UrlImage), Style: "primary"}}}}
+	action := slack.ActionBlock{Type: "actions", Elements: &slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &slack.TextBlockObject{Type: "plain_text", Text: "Add To Playlist"}, Value: fmt.Sprintf(`{"action": "add", "id": "%s", "trackName": "%s", "trackArtist": "%s", "trasckAlbum": "%s", "imageUrl": "%s"}`, track.Id, track.Title, track.Artist, track.Album, track.UrlImage), Style: "primary"}}}}
 	blocks := []slack.Block{header, footer, action}
 	attachment := slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: blocks}}
 	return attachment
@@ -40,7 +40,9 @@ func buildAttachment(track Spotify.Song) slack.Attachment {
 
 func buildAttachmentNoAction(track Spotify.Song) slack.Attachment {
 	header := buildHeader(track)
-	return slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: []slack.Block{header}}}
+	action := slack.ActionBlock{Type: "actions", Elements: &slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &slack.TextBlockObject{Type: "plain_text", Text: "Remove"}, Value: fmt.Sprintf(`{"action": "remove", "id": "%s", "trackName": "%s", "trackArtist": "%s", "trasckAlbum": "%s", "imageUrl": "%s"}`, track.Id, track.Title, track.Artist, track.Album, track.UrlImage), Style: "danger"}}}}
+	blocks := []slack.Block{header, action}
+	return slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: blocks}}
 }
 
 func buildHeader(track Spotify.Song) slack.SectionBlock {
@@ -54,7 +56,7 @@ func buildFooter(track Spotify.Song) slack.SectionBlock {
 	return slack.SectionBlock{Type: "section", Text: &slack.TextBlockObject{Type: "mrkdwn", Text: text}}
 }
 
-func UpdateOriginalMessage(trackValue string, channelId string, messageTs string, responseUrl string) {
+func UpdateOriginalMessage(trackValue string, channelId string, messageTs string, responseUrl string, action string) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
 
 	Id, Title, Artist, Album, UrlImage := (gjson.Get(trackValue, "id")).String(), (gjson.Get(trackValue, "trackName")).String(), (gjson.Get(trackValue, "trackArtist")).String(), (gjson.Get(trackValue, "trackAlbum")).String(), (gjson.Get(trackValue, "imageUrl")).String()
@@ -67,10 +69,18 @@ func UpdateOriginalMessage(trackValue string, channelId string, messageTs string
 		ImageURL: track.UrlImage,
 	}
 
-	text := slack.TextBlockObject{Type: "mrkdwn", Text: fmt.Sprintf("_*%s*_ by _*%s*_ added to the Playlist!", track.Title, track.Artist)}
-	context := slack.NewContextBlock("", image, text)
+	var blocks []slack.Block
 
-	blocks := []slack.Block{header, footer, context}
+	if action == "add" {
+		text := slack.TextBlockObject{Type: "mrkdwn", Text: fmt.Sprintf("_*%s*_ by _*%s*_ added to the Playlist!", track.Title, track.Artist)}
+		context := slack.NewContextBlock("", image, text)
+		blocks = []slack.Block{header, footer, context}
+	} else if action == "remove" {
+		text := slack.TextBlockObject{Type: "mrkdwn", Text: fmt.Sprintf("_*%s*_ by _*%s*_ Removed from the Playlist!", track.Title, track.Artist)}
+		context := slack.NewContextBlock("", image, text)
+		blocks = []slack.Block{header, context}
+	}
+
 	attachment := slack.Attachment{Color: "#1CDF63", Blocks: slack.Blocks{BlockSet: blocks}}
 
 	_, _, _, err := api.UpdateMessage(channelId, messageTs, slack.MsgOptionReplaceOriginal(responseUrl), slack.MsgOptionAttachments(attachment))

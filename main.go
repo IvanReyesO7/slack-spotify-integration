@@ -103,16 +103,27 @@ func main() {
 		responseUrl := (gjson.Get(json, "response_url")).String()
 		channelId := (gjson.Get(json, "channel.id")).String()
 		messageTs := (gjson.Get(json, "container.message_ts")).String()
-		snapshot, err := Spotify.AddTrackToPlaylist(trackId)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"replace_original": "true",
-				"text":             "⛔️ Sorry, Something went wrong",
-			})
-		} else if snapshot != nil {
-			Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl)
-
+		action := (gjson.Get(trackValue, "action")).String()
+		if action == "add" {
+			snapshot, err := Spotify.AddTrackToPlaylist(trackId)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"replace_original": "true",
+					"text":             "⛔️ Sorry, Something went wrong",
+				})
+			} else if snapshot != nil {
+				Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl, action)
+			}
+		} else if action == "remove" {
+			snapshot, err := Spotify.RemoveFromPlaylist(trackId)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"replace_original": "true",
+					"text":             "⛔️ Sorry, Something went wrong",
+				})
+			} else if snapshot != nil {
+				Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl, action)
+			}
 		}
 
 	})
