@@ -99,6 +99,22 @@ func AddTrackToPlaylist(trackId string) (*string, error) {
 	return &snapshot, nil
 }
 
+func RemoveFromPlaylist(trackId string) (*string, error) {
+	ctx := context.Background()
+	token := oauth2.Token{AccessToken: RefreshSpotifyAccessToken()}
+	httpClient := spotifyauth.New().Client(ctx, &token)
+	client := spotify.New(httpClient)
+	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
+	track := spotify.ID(trackId)
+
+	snapshot, err := client.RemoveTracksFromPlaylist(ctx, playlist_id, track)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &snapshot, nil
+}
+
 func RefreshSpotifyAccessToken() string {
 	requestUrl := "https://accounts.spotify.com/api/token"
 	buffer := fmt.Sprintf("Basic %s", os.Getenv("SPOTIFY_BUFFER"))
