@@ -60,6 +60,7 @@ func main() {
 				}
 
 				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
+				c.JSON(http.StatusOK, nil)
 				return
 			case "commands", "help":
 				err := Slack.SendCommands(event.Channel, event.Ts)

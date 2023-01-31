@@ -3,7 +3,6 @@ package slack
 import (
 	"fmt"
 	"os"
-	"time"
 
 	Spotify "slack-spotify-integration/spotify"
 
@@ -27,7 +26,6 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action 
 			fmt.Printf("%s\n", err)
 		}
 	}
-	time.Sleep(5 * time.Second)
 	return
 }
 
