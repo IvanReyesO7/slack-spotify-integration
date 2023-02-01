@@ -18,7 +18,7 @@ func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action 
 		if action == true {
 			attachments = buildAttachment(track)
 		} else {
-			attachments = buildAttachmentNoAction(track)
+			attachments = buildAttachmentWithRemoveAction(track)
 		}
 
 		_, _, err := api.PostMessage(channel, slack.MsgOptionTS(thread_ts), slack.MsgOptionAttachments(attachments))
@@ -38,7 +38,7 @@ func buildAttachment(track Spotify.Song) slack.Attachment {
 	return attachment
 }
 
-func buildAttachmentNoAction(track Spotify.Song) slack.Attachment {
+func buildAttachmentWithRemoveAction(track Spotify.Song) slack.Attachment {
 	header := buildHeader(track)
 	action := slack.ActionBlock{Type: "actions", Elements: &slack.BlockElements{ElementSet: []slack.BlockElement{slack.ButtonBlockElement{Type: "button", Text: &slack.TextBlockObject{Type: "plain_text", Text: "Remove"}, Value: fmt.Sprintf(`{"action": "remove", "id": "%s", "trackName": "%s", "trackArtist": "%s", "trasckAlbum": "%s", "imageUrl": "%s"}`, track.Id, track.Title, track.Artist, track.Album, track.UrlImage), Style: "danger"}}}}
 	blocks := []slack.Block{header, action}
