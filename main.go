@@ -111,7 +111,7 @@ func main() {
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"replace_original": "true",
-					"text":             "⛔️ Sorry, Something went wrong",
+					"text":             "Sorry, Something went wrong",
 				})
 			} else if snapshot != nil {
 				Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl, action)
@@ -121,7 +121,7 @@ func main() {
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"replace_original": "true",
-					"text":             "⛔️ Sorry, Something went wrong",
+					"text":             "Sorry, Something went wrong",
 				})
 			} else if snapshot != nil {
 				Slack.UpdateOriginalMessage(trackValue, channelId, messageTs, responseUrl, action)
@@ -137,5 +137,5 @@ func main() {
 		})
 	})
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run()
 }
