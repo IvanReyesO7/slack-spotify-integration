@@ -10,14 +10,15 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action bool) {
+func SendTracks(channel string, thread_ts string, tracks []Spotify.Song, action string) {
 	api := slack.New(os.Getenv("SLACK_TOKEN"), slack.OptionDebug(true))
 
 	for _, track := range tracks {
 		var attachments slack.Attachment
-		if action == true {
+		switch action{
+		case "Add":
 			attachments = buildAttachmentWithAddAction(track)
-		} else {
+		case "Remove":
 			attachments = buildAttachmentWithRemoveAction(track)
 		}
 
