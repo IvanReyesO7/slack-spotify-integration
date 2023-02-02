@@ -58,7 +58,7 @@ func main() {
 					return
 				}
 
-				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
+				Slack.SendTracks(event.Channel, event.Ts, tracks, "Remove")
 				c.JSON(http.StatusOK, nil)
 				return
 			case "commands", "help":
@@ -81,7 +81,7 @@ func main() {
 					return
 				}
 
-				Slack.SendTracks(event.Channel, event.Ts, tracks, true)
+				Slack.SendTracks(event.Channel, event.Ts, tracks, "Add")
 				return
 			}
 		}
