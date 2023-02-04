@@ -32,7 +32,7 @@ func main() {
 	Infrastructure.NewConfig()
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"response": "Server up"})
+		c.JSON(http.StatusOK, gin.H{"response": "Server's up and running!"})
 	})
 	r.POST("/", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
