@@ -105,6 +105,7 @@ func main() {
 		channelId := (gjson.Get(json, "channel.id")).String()
 		messageTs := (gjson.Get(json, "container.message_ts")).String()
 		action := (gjson.Get(trackValue, "action")).String()
+		
 		if action == "add" {
 			snapshot, err := Spotify.AddTrackToPlaylist(trackId)
 			if err != nil {
