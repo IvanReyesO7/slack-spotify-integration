@@ -65,7 +65,7 @@ func GetPlaylistQueue() ([]Song, error) {
 	httpClient := spotifyauth.New().Client(ctx, &token)
 	client := spotify.New(httpClient)
 	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
-	results, err := client.GetPlaylistItems(ctx, playlist_id)
+	results, err := client.GetPlaylistItems(ctx, playlist_id, spotify.Limit(13))
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
