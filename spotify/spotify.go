@@ -24,7 +24,6 @@ type Song struct {
 	Title    string
 	Album    string
 	Artist   string
-	Duration string
 	UrlImage string
 }
 
@@ -53,7 +52,7 @@ func GetSongs(keyword string) ([]Song, error) {
 	tracks := []Song{}
 	if results.Tracks != nil {
 		for _, item := range results.Tracks.Tracks {
-			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Duration: convertDuration(item.Duration), Id: string(item.ID), UrlImage: item.Album.Images[0].URL})
+			tracks = append(tracks, Song{Title: item.Name, Album: item.Album.Name, Artist: item.Artists[0].Name, Id: string(item.ID), UrlImage: item.Album.Images[0].URL})
 		}
 	}
 	return tracks, nil
@@ -66,7 +65,7 @@ func GetPlaylistQueue() ([]Song, error) {
 	httpClient := spotifyauth.New().Client(ctx, &token)
 	client := spotify.New(httpClient)
 	playlist_id := spotify.ID(os.Getenv("SPOTIFY_PLAYLIST_ID"))
-	results, err := client.GetPlaylistItems(ctx, playlist_id)
+	results, err := client.GetPlaylistItems(ctx, playlist_id, spotify.Limit(13))
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -75,7 +74,7 @@ func GetPlaylistQueue() ([]Song, error) {
 	tracks := []Song{}
 	if results.Items != nil {
 		for _, item := range results.Items {
-			tracks = append(tracks, Song{Title: item.Track.Track.Name, Album: item.Track.Track.Album.Name, Artist: item.Track.Track.Artists[0].Name, Duration: convertDuration(item.Track.Track.Duration), Id: string(item.Track.Track.ID), UrlImage: item.Track.Track.Album.Images[0].URL})
+			tracks = append(tracks, Song{Title: item.Track.Track.Name, Album: item.Track.Track.Album.Name, Artist: item.Track.Track.Artists[0].Name, Id: string(item.Track.Track.ID), UrlImage: item.Track.Track.Album.Images[0].URL})
 		}
 
 	}
@@ -140,11 +139,4 @@ func RefreshSpotifyAccessToken() string {
 	}
 	bodyString := string(bodyBytes)
 	return gjson.Get(bodyString, "access_token").String()
-}
-
-func convertDuration(duration int) string {
-	secs := duration / 1000
-	mins := secs / 60
-	sec := secs - (mins * 60)
-	return fmt.Sprintf("%d:%d", mins, sec)
 }

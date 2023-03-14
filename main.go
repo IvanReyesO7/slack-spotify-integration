@@ -33,7 +33,7 @@ func main() {
 	Infrastructure.NewConfig()
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"response": "Server up"})
+		c.JSON(http.StatusOK, gin.H{"Status": "Server is up and running!"})
 	})
 	r.POST("/", func(c *gin.Context) {
 		challenge, _ := ioutil.ReadAll(c.Request.Body)
@@ -59,7 +59,7 @@ func main() {
 					return
 				}
 
-				Slack.SendTracks(event.Channel, event.Ts, tracks, false)
+				Slack.SendTracks(event.Channel, event.Ts, tracks, "Remove")
 				c.JSON(http.StatusOK, nil)
 				return
 			case "commands", "help":
@@ -82,7 +82,7 @@ func main() {
 					return
 				}
 
-				Slack.SendTracks(event.Channel, event.Ts, tracks, true)
+				Slack.SendTracks(event.Channel, event.Ts, tracks, "Add")
 				return
 			}
 		}
@@ -106,6 +106,7 @@ func main() {
 		channelId := (gjson.Get(json, "channel.id")).String()
 		messageTs := (gjson.Get(json, "container.message_ts")).String()
 		action := (gjson.Get(trackValue, "action")).String()
+		
 		if action == "add" {
 			snapshot, err := Spotify.AddTrackToPlaylist(trackId)
 			if err != nil {
